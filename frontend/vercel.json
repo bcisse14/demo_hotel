@@ -4,6 +4,7 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/api/:path*" },
-    { "source": "/payments/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/payments/:path*" }
+    { "source": "/payments/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/payments/:path*" },
+    { "source": "/images/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/images/:path*" }
   ]
 }
