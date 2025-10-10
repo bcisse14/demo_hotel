@@ -3,11 +3,10 @@
 namespace App\DataFixtures;
 
 use App\Entity\Room;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
-class AppFixtures extends Fixture
+class AppFixtures
 {
     public function load(ObjectManager $manager): void
     {
