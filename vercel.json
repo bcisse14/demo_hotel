@@ -2,6 +2,10 @@
   "buildCommand": "cd frontend && npm ci && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
+  "headers": [
+    { "source": "/index.html", "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
+    { "source": "/", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
+  ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/api/:path*" },
     { "source": "/payments/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/payments/:path*" },
