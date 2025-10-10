@@ -82,3 +82,39 @@ body {
 
 /* Gold divider */
 .gold-divider { height: 2px; background: linear-gradient(90deg, transparent, var(--color-primary), transparent); }
+
+/* Responsive Navbar */
+.site-title { letter-spacing: .02em; }
+.desktop-nav { display: none; }
+.mobile-nav-toggle { display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 9999px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+.mobile-nav-toggle:hover { background: rgba(255,255,255,.08); }
+.mobile-nav-toggle .hamburger { position: relative; width: 18px; height: 2px; background: #fff; display: inline-block; }
+.mobile-nav-toggle .hamburger::before, .mobile-nav-toggle .hamburger::after { content:""; position: absolute; left: 0; width: 18px; height: 2px; background: #fff; transition: transform .2s ease, opacity .2s ease; }
+.mobile-nav-toggle .hamburger::before { top: -6px; }
+.mobile-nav-toggle .hamburger::after { top: 6px; }
+.mobile-nav-toggle.open .hamburger { background: transparent; }
+.mobile-nav-toggle.open .hamburger::before { transform: translateY(6px) rotate(45deg); }
+.mobile-nav-toggle.open .hamburger::after { transform: translateY(-6px) rotate(-45deg); }
+
+.mobile-menu { display: grid; grid-template-columns: 1fr; gap: 8px; padding: 8px 16px 12px; background: rgba(10,14,23,.96); border-bottom: 1px solid rgba(199,164,77,.16); transform-origin: top; max-height: 0; overflow: hidden; transition: max-height .25s ease; }
+.mobile-menu.open { max-height: 220px; }
+.mobile-link { color: var(--color-ivory); font-weight: 600; padding: 10px 8px; border-radius: 10px; }
+.mobile-link:hover { color: var(--color-primary); background: rgba(199,164,77,.08); }
+.mobile-link-active { color: var(--color-primary); }
+
+/* At >= 768px show desktop nav and hide hamburger/mobile menu */
+@media (min-width: 768px) {
+  .desktop-nav { display: flex; }
+  .mobile-nav-toggle { display: none; }
+  .mobile-menu { display: none; }
+}
+
+/* Mobile polish for spacing and readability */
+@media (max-width: 767px) {
+  .container-px { padding-left: 1rem; padding-right: 1rem; }
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.25rem; }
+  .card { border-radius: 0.875rem; box-shadow: 0 16px 32px rgba(11,18,32,.08), 0 2px 6px rgba(11,18,32,.05); }
+  .input { padding: 0.6rem 0.75rem; }
+  .btn-primary, .btn-secondary { padding: 0.7rem 1rem; }
+}

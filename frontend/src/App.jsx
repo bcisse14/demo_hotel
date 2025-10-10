@@ -1,5 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { BrowserRouter, Routes, Route, Link, NavLink } from 'react-router-dom';
+import { useState } from 'react';
 import './index.css';
 
 import Home from './pages/Home';
@@ -10,17 +11,37 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 
 function Layout({ children }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = () => setMenuOpen(false);
   return (
     <div className="min-h-screen flex flex-col">
       <header className="lux-header sticky top-0 z-40">
         <div className="container-px mx-auto py-4 flex items-center justify-between">
-          <Link to="/" className="font-serif text-2xl" style={{color:'#fff'}}>Maison Azur</Link>
-          <nav className="flex gap-4 text-sm">
-            <NavLink to="/" className={({isActive}) => `nav-link ${isActive? 'nav-link-active':''}`}>Accueil</NavLink>
-            <NavLink to="/chambres" className={({isActive}) => `nav-link ${isActive? 'nav-link-active':''}`}>Chambres</NavLink>
-            <NavLink to="/reservation" className={({isActive}) => `nav-link ${isActive? 'nav-link-active':''}`}>Réserver</NavLink>
-            <NavLink to="/contact" className={({isActive}) => `nav-link ${isActive? 'nav-link-active':''}`}>Contact</NavLink>
+          <Link to="/" className="font-serif text-2xl site-title" style={{color:'#fff'}} onClick={closeMenu}>Maison Azur</Link>
+          {/* Desktop nav */}
+          <nav className="desktop-nav flex gap-4 text-sm">
+            <NavLink to="/" onClick={closeMenu} className={({isActive}) => `nav-link ${isActive? 'nav-link-active':''}`}>Accueil</NavLink>
+            <NavLink to="/chambres" onClick={closeMenu} className={({isActive}) => `nav-link ${isActive? 'nav-link-active':''}`}>Chambres</NavLink>
+            <NavLink to="/reservation" onClick={closeMenu} className={({isActive}) => `nav-link ${isActive? 'nav-link-active':''}`}>Réserver</NavLink>
+            <NavLink to="/contact" onClick={closeMenu} className={({isActive}) => `nav-link ${isActive? 'nav-link-active':''}`}>Contact</NavLink>
           </nav>
+          {/* Mobile hamburger */}
+          <button
+            className={`mobile-nav-toggle ${menuOpen ? 'open' : ''}`}
+            aria-label="Ouvrir le menu"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setMenuOpen(o => !o)}
+          >
+            <span className="hamburger" />
+          </button>
+        </div>
+        {/* Mobile menu */}
+        <div id="mobile-menu" className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
+          <NavLink to="/" onClick={closeMenu} className={({isActive}) => `mobile-link ${isActive? 'mobile-link-active':''}`}>Accueil</NavLink>
+          <NavLink to="/chambres" onClick={closeMenu} className={({isActive}) => `mobile-link ${isActive? 'mobile-link-active':''}`}>Chambres</NavLink>
+          <NavLink to="/reservation" onClick={closeMenu} className={({isActive}) => `mobile-link ${isActive? 'mobile-link-active':''}`}>Réserver</NavLink>
+          <NavLink to="/contact" onClick={closeMenu} className={({isActive}) => `mobile-link ${isActive? 'mobile-link-active':''}`}>Contact</NavLink>
         </div>
         <div className="gold-divider" />
       </header>
