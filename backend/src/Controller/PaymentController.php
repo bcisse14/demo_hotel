@@ -7,13 +7,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Attribute\AsController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[AsController]
-class PaymentController
+class PaymentController extends AbstractController
 {
     #[Route('/payments/intent', name: 'payment_intent_options', methods: ['OPTIONS'])]
     public function options(): JsonResponse
@@ -27,7 +27,7 @@ class PaymentController
     }
 
     #[Route('/payments/intent', name: 'payment_intent', methods: ['POST'])]
-    public function intent(Request $request, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
+    public function intent(Request $request, EntityManagerInterface $em): JsonResponse
     {
         // TEMP: early return to validate controller reachability in production
         if ($request->query->get('ping') === '1') {
@@ -54,17 +54,25 @@ class PaymentController
             $reservation->setAmountPaid((int)($data['amount'] ?? 0));
             $em->flush();
 
-            // Send simulated confirmation email
-            $startTxt = $reservation->getStartDate() ? $reservation->getStartDate()->format('d/m/Y') : '';
-            $endTxt = $reservation->getEndDate() ? $reservation->getEndDate()->format('d/m/Y') : '';
-            $email = (new Email())
-                ->from('no-reply@demo-hotel.local')
-                ->to($reservation->getEmail())
-                ->subject('Confirmation de réservation')
-                ->text(sprintf('Bonjour %s, votre réservation est confirmée du %s au %s.',
-                    $reservation->getName(), $startTxt, $endTxt));
+            // Send simulated confirmation email (best-effort, only if a mailer service exists and email seems valid)
             try {
-                $mailer->send($email);
+                $emailAddr = $reservation->getEmail();
+                if (\filter_var($emailAddr, \FILTER_VALIDATE_EMAIL)) {
+                    $startTxt = $reservation->getStartDate() ? $reservation->getStartDate()->format('d/m/Y') : '';
+                    $endTxt = $reservation->getEndDate() ? $reservation->getEndDate()->format('d/m/Y') : '';
+                    $email = (new Email())
+                        ->from('no-reply@demo-hotel.local')
+                        ->to($emailAddr)
+                        ->subject('Confirmation de réservation')
+                        ->text(sprintf('Bonjour %s, votre réservation est confirmée du %s au %s.',
+                            $reservation->getName(), $startTxt, $endTxt));
+                    if (isset($this->container) && $this->container->has('mailer')) {
+                        $mailer = $this->container->get('mailer');
+                        if ($mailer && method_exists($mailer, 'send')) {
+                            $mailer->send($email);
+                        }
+                    }
+                }
             } catch (\Throwable $e) {
                 // swallow email errors in sandbox
             }
