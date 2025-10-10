@@ -10,14 +10,21 @@ if [ ! -f /app/.env ]; then
 fi
 
 echo "[entrypoint] Waiting for database to be ready..."
-for i in {1..30}; do
-  if php bin/console doctrine:query:sql "SELECT 1" >/dev/null 2>&1; then
+max_retries=45
+for i in $(seq 1 $max_retries); do
+  if php docker/wait_for_db.php >/dev/null 2>&1; then
     echo "[entrypoint] Database is available."
     break
+  else
+    echo "[entrypoint] DB not ready yet, retry $i/$max_retries..."
+    php docker/wait_for_db.php || true
+    sleep 2
   fi
-  echo "[entrypoint] DB not ready yet, retry $i/30..."
-  sleep 2
 done
+
+if ! php docker/wait_for_db.php >/dev/null 2>&1; then
+  echo "[entrypoint] Database still not reachable after $max_retries retries. Starting anyway."
+fi
 
 echo "[entrypoint] Installing PHP dependencies (no-dev, no-scripts)..."
 composer install --no-dev --no-scripts --prefer-dist --no-interaction --optimize-autoloader || true
