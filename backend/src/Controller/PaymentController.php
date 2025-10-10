@@ -48,22 +48,19 @@ class PaymentController
             $reservation->setAmountPaid((int)($data['amount'] ?? 0));
             $em->flush();
 
-            // Send simulated confirmation email (only if email is valid)
+            // Send simulated confirmation email
+            $startTxt = $reservation->getStartDate() ? $reservation->getStartDate()->format('d/m/Y') : '';
+            $endTxt = $reservation->getEndDate() ? $reservation->getEndDate()->format('d/m/Y') : '';
+            $email = (new Email())
+                ->from('no-reply@demo-hotel.local')
+                ->to($reservation->getEmail())
+                ->subject('Confirmation de réservation')
+                ->text(sprintf('Bonjour %s, votre réservation est confirmée du %s au %s.',
+                    $reservation->getName(), $startTxt, $endTxt));
             try {
-                $emailAddr = $reservation->getEmail();
-                if (\filter_var($emailAddr, \FILTER_VALIDATE_EMAIL)) {
-                    $startTxt = $reservation->getStartDate() ? $reservation->getStartDate()->format('d/m/Y') : '';
-                    $endTxt = $reservation->getEndDate() ? $reservation->getEndDate()->format('d/m/Y') : '';
-                    $email = (new Email())
-                        ->from('no-reply@demo-hotel.local')
-                        ->to($emailAddr)
-                        ->subject('Confirmation de réservation')
-                        ->text(sprintf('Bonjour %s, votre réservation est confirmée du %s au %s.',
-                            $reservation->getName(), $startTxt, $endTxt));
-                    $mailer->send($email);
-                }
+                $mailer->send($email);
             } catch (\Throwable $e) {
-                // swallow email build/send errors in sandbox
+                // swallow email errors in sandbox
             }
 
             return new JsonResponse(['status' => 'succeeded'], 200, [
