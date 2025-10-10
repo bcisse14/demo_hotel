@@ -9,12 +9,15 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
 
 # Install system deps and PHP extensions needed for Symfony + Postgres
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       git unzip libicu-dev libpq-dev libzip-dev libjpeg-dev libpng-dev \
-    && docker-php-ext-configure intl \
-    && docker-php-ext-configure gd --with-jpeg \
-    && docker-php-ext-install -j$(nproc) intl gd zip pdo pdo_pgsql \
-    && rm -rf /var/lib/apt/lists/*
+     && apt-get install -y --no-install-recommends \
+         git unzip pkg-config \
+         libicu-dev libpq-dev \
+         libzip-dev zlib1g-dev \
+         libjpeg-dev libpng-dev libwebp-dev libfreetype6-dev \
+     && docker-php-ext-configure intl \
+     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+     && docker-php-ext-install -j$(nproc) intl gd zip pdo pdo_pgsql \
+     && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -28,8 +31,8 @@ COPY . /app
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
     && composer dump-autoload --optimize
 
-# Expose the port (Render sets $PORT at runtime)
-EXPOSE 8080
+# Expose the port (platform sets $PORT at runtime)
+EXPOSE 8000
 
 # Default command does nothing; Render's dockerCommand in render.yaml runs migrations and starts server
 CMD ["php", "-v"]
