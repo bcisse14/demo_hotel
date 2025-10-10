@@ -1,15 +1,11 @@
 import axios from 'axios';
 
-// Prefer explicit Vercel/Vite env, otherwise same-origin in browser; if on vercel.app, fallback to Koyeb backend; finally dev fallback
-const inferredOrigin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
-const onVercel = (typeof window !== 'undefined' && window.location && /\.vercel\.app$/.test(window.location.hostname));
-const fallbackKoyeb = 'https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app';
-const computedDefault = onVercel ? fallbackKoyeb : inferredOrigin;
-const rawEnvUrl = (import.meta.env.VITE_API_URL ? String(import.meta.env.VITE_API_URL).trim() : '');
-const looksLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\\d+)?/i.test(rawEnvUrl);
-// In production builds, ignore a localhost VITE_API_URL to prevent leaking dev config
-const safeEnvUrl = (import.meta.env.PROD && looksLocal) ? '' : rawEnvUrl;
-const baseURL = safeEnvUrl || computedDefault || 'http://127.0.0.1:8000';
+// In production, always use Koyeb. In local dev (localhost/127.0.0.1), use local Symfony.
+const isBrowser = typeof window !== 'undefined' && !!window.location;
+const isLocalHost = isBrowser && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+const baseURL = isLocalHost
+  ? 'http://127.0.0.1:8000'
+  : 'https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app';
 export const api = axios.create({ baseURL, headers: { 'Content-Type': 'application/ld+json', 'Accept': 'application/ld+json' } });
 
 export async function fetchRooms(params = {}) {
