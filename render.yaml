@@ -1,7 +1,7 @@
 services:
   - type: web
     name: demo-hotel-backend
-    env: docker
+    runtime: docker
     plan: free
     dockerfilePath: backend/Dockerfile
     dockerContext: backend
@@ -16,18 +16,9 @@ services:
           name: demo-hotel-db
           property: connectionString
       - key: MAILER_DSN
-        value: smtp://smtp:1025
+        value: null://null
     healthCheckPath: /api
     autoDeploy: true
-  - type: pserv
-    name: smtp
-    env: docker
-    plan: free
-    dockerImage: axllent/mailpit:latest
-    autoDeploy: true
-    ports:
-      - 1025
-      - 8025
-  - type: postgres
-    name: demo-hotel-db
+databases:
+  - name: demo-hotel-db
     plan: free
