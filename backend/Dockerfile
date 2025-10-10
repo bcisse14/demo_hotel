@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# Base image with PHP CLI
-FROM php:8.3-cli-bullseye AS base
+# Base image with PHP CLI (bookworm for newer libpq with SNI support)
+FROM php:8.3-cli-bookworm AS base
 
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
     APP_ENV=prod \
