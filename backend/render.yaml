@@ -1,7 +1,7 @@
 services:
   - type: web
     name: demo-hotel-backend
-    runtime: docker
+    env: docker
     plan: free
     dockerfilePath: Dockerfile
     dockerContext: .
@@ -18,7 +18,7 @@ services:
       - key: MAILER_DSN
         value: null://null
     healthCheckPath: /api
-    autoDeploy: true
+    autoDeployTrigger: commit
 databases:
   - name: demo-hotel-db
     plan: free
