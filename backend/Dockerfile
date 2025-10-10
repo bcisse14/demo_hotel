@@ -29,10 +29,11 @@ COPY . /app
 
 # Install PHP deps (no dev) and optimize autoloader
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
-    && composer dump-autoload --optimize
+    && composer dump-autoload --optimize \
+    && chmod +x /app/docker/entrypoint.sh
 
 # Expose the port (platform sets $PORT at runtime)
 EXPOSE 8000
 
 # Default command does nothing; Render's dockerCommand in render.yaml runs migrations and starts server
-CMD ["php", "-v"]
+CMD ["/app/docker/entrypoint.sh"]

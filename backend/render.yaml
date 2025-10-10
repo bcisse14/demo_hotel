@@ -5,7 +5,7 @@ services:
     plan: free
     dockerfilePath: Dockerfile
     dockerContext: .
-  dockerCommand: 'bash -lc "composer install --no-dev --optimize-autoloader && php bin/console doctrine:migrations:migrate --no-interaction && php bin/console app:ensure-seed && php -S 0.0.0.0:$PORT -t public public/index.php"'
+  dockerCommand: '/app/docker/entrypoint.sh'
     envVars:
       - key: APP_ENV
         value: prod
