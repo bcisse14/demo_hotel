@@ -1,17 +1,17 @@
 {
-  "buildCommand": "cd frontend && npm ci && npm run build",
-  "outputDirectory": "frontend/dist",
-  "framework": "vite",
-  "headers": [
-    { "source": "/index.html", "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
-    { "source": "/", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
   ],
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/api/:path*" },
-    { "source": "/payments/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/payments/:path*" },
-    { "source": "/images/:path*", "destination": "https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app/images/:path*" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
   ]
-}{
+}
   "buildCommand": "cd frontend && npm ci && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
