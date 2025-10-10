@@ -24,8 +24,21 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Copy app files
-COPY . /app
+# Copy sources into a temp location regardless of build context
+# - If Koyeb builds from repo root: "/src/backend" exists
+# - If Koyeb builds with context=backend: project files exist directly in "/src"
+COPY . /src
+
+# Normalize sources into /app so composer.json is always at /app/composer.json
+RUN set -eux; \
+    if [ -f /src/composer.json ]; then \
+        cp -a /src/. /app/; \
+    elif [ -f /src/backend/composer.json ]; then \
+        cp -a /src/backend/. /app/; \
+    else \
+        echo "composer.json not found in /src or /src/backend" >&2; \
+        exit 1; \
+    fi
 
 # Install PHP deps (no dev) and optimize autoloader
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
