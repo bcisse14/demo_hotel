@@ -5,7 +5,11 @@ const inferredOrigin = (typeof window !== 'undefined' && window.location && wind
 const onVercel = (typeof window !== 'undefined' && window.location && /\.vercel\.app$/.test(window.location.hostname));
 const fallbackKoyeb = 'https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app';
 const computedDefault = onVercel ? fallbackKoyeb : inferredOrigin;
-const baseURL = (import.meta.env.VITE_API_URL ? String(import.meta.env.VITE_API_URL) : computedDefault) || 'http://127.0.0.1:8000';
+const rawEnvUrl = (import.meta.env.VITE_API_URL ? String(import.meta.env.VITE_API_URL).trim() : '');
+const looksLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\\d+)?/i.test(rawEnvUrl);
+// In production builds, ignore a localhost VITE_API_URL to prevent leaking dev config
+const safeEnvUrl = (import.meta.env.PROD && looksLocal) ? '' : rawEnvUrl;
+const baseURL = safeEnvUrl || computedDefault || 'http://127.0.0.1:8000';
 export const api = axios.create({ baseURL, headers: { 'Content-Type': 'application/ld+json', 'Accept': 'application/ld+json' } });
 
 export async function fetchRooms(params = {}) {
