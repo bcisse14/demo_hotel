@@ -40,8 +40,8 @@ RUN set -eux; \
         exit 1; \
     fi
 
-# Install PHP deps (no dev) and optimize autoloader
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
+# Install PHP deps (no dev) and optimize autoloader (skip scripts to avoid cache:clear at build time)
+RUN composer install --no-dev --no-scripts --prefer-dist --no-interaction --optimize-autoloader \
     && composer dump-autoload --optimize \
     && chmod +x /app/docker/entrypoint.sh
 
