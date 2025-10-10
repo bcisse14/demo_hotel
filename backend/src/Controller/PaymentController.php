@@ -29,6 +29,12 @@ class PaymentController
     #[Route('/payments/intent', name: 'payment_intent', methods: ['POST'])]
     public function intent(Request $request, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
     {
+        // TEMP: early return to validate controller reachability in production
+        if ($request->query->get('ping') === '1') {
+            return new JsonResponse(['ping' => 'ok'], 200, [
+                'Access-Control-Allow-Origin' => '*',
+            ]);
+        }
         try {
             $data = json_decode($request->getContent(), true) ?? [];
             // Simulate a payment success and mark reservation as confirmed with partial amount
