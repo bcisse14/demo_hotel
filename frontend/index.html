@@ -11,6 +11,53 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function(){
+        try {
+          var KOYEB = 'https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app';
+          var LOCAL_HOSTS = [
+            'http://127.0.0.1:8010',
+            'http://localhost:8010',
+            'http://127.0.0.1:8000',
+            'http://localhost:8000'
+          ];
+          var isProd = typeof location !== 'undefined' && location.hostname && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+          if(!isProd) return;
+
+          function replaceLocal(url){
+            if(typeof url !== 'string') return url;
+            for (var i=0;i<LOCAL_HOSTS.length;i++){
+              var lh = LOCAL_HOSTS[i];
+              if(url.indexOf(lh) === 0) return KOYEB + url.slice(lh.length);
+            }
+            return url;
+          }
+
+          var origFetch = window.fetch;
+          if (origFetch) {
+            window.fetch = function(input, init){
+              if (typeof input === 'string') {
+                input = replaceLocal(input);
+              } else if (input && typeof input.url === 'string') {
+                var newUrl = replaceLocal(input.url);
+                if (newUrl !== input.url) input = new Request(newUrl, input);
+              }
+              return origFetch(input, init);
+            };
+          }
+
+          var origOpen = XMLHttpRequest && XMLHttpRequest.prototype && XMLHttpRequest.prototype.open;
+          if (origOpen) {
+            XMLHttpRequest.prototype.open = function(method, url){
+              var newUrl = replaceLocal(url);
+              return origOpen.apply(this, [method, newUrl].concat([].slice.call(arguments, 2)));
+            };
+          }
+        } catch(e) {
+          // noop
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
