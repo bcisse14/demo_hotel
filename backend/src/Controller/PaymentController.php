@@ -7,7 +7,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Attribute\AsController;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,58 +28,20 @@ class PaymentController extends AbstractController
     #[Route('/payments/intent', name: 'payment_intent', methods: ['POST'])]
     public function intent(Request $request, EntityManagerInterface $em): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true) ?? [];
-            // Simulate a payment success and mark reservation as confirmed with partial amount
-            $reservationId = $data['reservation_id'] ?? null;
-            if (!$reservationId) {
-                return new JsonResponse(['error' => 'reservation_id required'], 400, [
-                    'Access-Control-Allow-Origin' => '*',
-                ]);
-            }
+        // Demo mode: always succeed. If reservation exists, mark it confirmed.
+        $data = json_decode($request->getContent(), true) ?? [];
+        $reservationId = $data['reservation_id'] ?? null;
+        if ($reservationId) {
             $reservation = $em->getRepository(Reservation::class)->find($reservationId);
-            if (!$reservation) {
-                return new JsonResponse(['error' => 'reservation not found'], 404, [
-                    'Access-Control-Allow-Origin' => '*',
-                ]);
+            if ($reservation) {
+                $reservation->setStatus('confirmed');
+                $reservation->setAmountPaid((int)($data['amount'] ?? 0));
+                try { $em->flush(); } catch (\Throwable $t) { /* ignore persistence errors in demo */ }
             }
-            $reservation->setStatus('confirmed');
-            $reservation->setAmountPaid((int)($data['amount'] ?? 0));
-            $em->flush();
-
-            // Send simulated confirmation email (best-effort, only if a mailer service exists and email seems valid)
-            try {
-                $emailAddr = $reservation->getEmail();
-                if (\filter_var($emailAddr, \FILTER_VALIDATE_EMAIL)) {
-                    $startTxt = $reservation->getStartDate() ? $reservation->getStartDate()->format('d/m/Y') : '';
-                    $endTxt = $reservation->getEndDate() ? $reservation->getEndDate()->format('d/m/Y') : '';
-                    $email = (new Email())
-                        ->from('no-reply@demo-hotel.local')
-                        ->to($emailAddr)
-                        ->subject('Confirmation de réservation')
-                        ->text(sprintf('Bonjour %s, votre réservation est confirmée du %s au %s.',
-                            $reservation->getName(), $startTxt, $endTxt));
-                    if (isset($this->container) && $this->container->has('mailer')) {
-                        $mailer = $this->container->get('mailer');
-                        if ($mailer && method_exists($mailer, 'send')) {
-                            $mailer->send($email);
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-                // swallow email errors in sandbox
-            }
-
-            return new JsonResponse(['status' => 'succeeded'], 200, [
-                'Access-Control-Allow-Origin' => '*',
-            ]);
-        } catch (\Throwable $e) {
-            return new JsonResponse([
-                'error' => 'payment_failed',
-                'message' => $e->getMessage(),
-            ], 500, [
-                'Access-Control-Allow-Origin' => '*',
-            ]);
         }
+
+        return new JsonResponse(['status' => 'succeeded'], 200, [
+            'Access-Control-Allow-Origin' => '*',
+        ]);
     }
 }
