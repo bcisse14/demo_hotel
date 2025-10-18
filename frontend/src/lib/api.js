@@ -3,9 +3,14 @@ import axios from 'axios';
 // In production, always use Koyeb. In local dev (localhost/127.0.0.1), use local Symfony.
 const isBrowser = typeof window !== 'undefined' && !!window.location;
 const isLocalHost = isBrowser && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+// Allow overriding the API base URL at build time (Vercel) via VITE_API_BASE_URL
+// Vite injecte import.meta.env.* côté client
+const envBase = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL)
+  ? import.meta.env.VITE_API_BASE_URL
+  : undefined;
 const baseURL = isLocalHost
   ? 'http://127.0.0.1:8000'
-  : 'https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app';
+  : (envBase || 'https://defensive-mehetabel-karlsefni-aa7acc6f.koyeb.app');
 export const api = axios.create({ baseURL, headers: { 'Content-Type': 'application/ld+json', 'Accept': 'application/ld+json' } });
 
 export async function fetchRooms(params = {}) {
